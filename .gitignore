@@ -166,3 +166,5 @@ cloudflared.log
 # colab
 config.ipynb
 
+# data
+data/

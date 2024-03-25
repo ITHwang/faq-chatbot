@@ -1,1 +1,5 @@
-# faq_chatbot
+# faq-chatbot
+
+
+# Environments
+- Python 3.10.12
