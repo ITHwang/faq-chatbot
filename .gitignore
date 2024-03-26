@@ -165,3 +165,11 @@ cloudflared.log
 
 # colab
 config.ipynb
+
+# vscode
+.vscode
+
+# data
+faq.json
+final_result.pkl
+chroma.sqlite3
