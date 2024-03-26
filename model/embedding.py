@@ -33,6 +33,7 @@ class FAQEmbedding(EmbeddingFunction):
         outputs = self.model(input_ids, attention_mask=attention_mask)
 
         embedding = average_pool(outputs.last_hidden_state, attention_mask)
+        # if the input is too long, the model returns multiple embeddings
         if embedding.size()[0] > 1:
             embedding = embedding.sum(dim=0, keepdim=True) / embedding.size()[0]
 

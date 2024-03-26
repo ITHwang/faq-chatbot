@@ -10,6 +10,10 @@ from utils.dto import QA
 
 
 class ExampleSelector:
+    """
+    like langchain.prompts.example_selector
+    """
+
     def __init__(self, examples: str, db_client: str, embedding_model):
         self.examples = examples
         self.db_client = db_client
@@ -25,6 +29,9 @@ class ExampleSelector:
 
     @staticmethod
     def load_example(example_path: str):
+        """
+        load qa meta data
+        """
         with open(example_path, "r") as file:
             dic = json.load(file)
         qas = [(int(e["id"]), QA(e["question"], e["answer"])) for e in dic]
@@ -44,5 +51,5 @@ class ExampleSelector:
         ids, dists = results["ids"][0], results["distances"][0]
         ids = [int(id_) for id_, dist in zip(ids, dists) if dist < thres]
 
-        # get examples
+        # get examples: if ids is empty, the query is not related to the domain
         return [self.examples[id_][1] for id_ in ids] if ids else []

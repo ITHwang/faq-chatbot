@@ -1,3 +1,4 @@
+import argparse
 import os
 import sys
 
@@ -16,8 +17,24 @@ from utils.memory import Memory
 from utils.prompt import PromptTemplate
 
 BASE_DIR = Path(__file__).parent
-db_path = str(BASE_DIR / "data" / "output")
-json_path = str(BASE_DIR / "data" / "output" / "faq.json")
+
+parser = argparse.ArgumentParser(description="Process some file paths.")
+
+parser.add_argument(
+    "--db_path", type=str, default=str(BASE_DIR / "data" / "db"), help="The path to the DB file"
+)
+
+parser.add_argument(
+    "--json_path",
+    type=str,
+    default=str(BASE_DIR / "data" / "faq.json"),
+    help="The path to the JSON file",
+)
+
+args = parser.parse_args()
+
+db_path = args.db_path
+json_path = args.json_path
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model_name = "beomi/llama-2-ko-7b"
@@ -66,12 +83,8 @@ while True:
         print(cannot_answer_comment)
         continue
 
-    print(prompt_text)
-
     answer = llm.answer(prompt_text, max_gen_len, stream=stream)
     memory.push(QA(query, answer.strip()))
-
-    print(memory)
 
     if not ask_continue():
         break

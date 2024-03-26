@@ -1,4 +1,8 @@
 class PromptTemplate:
+    """
+    like langchain.prompts.PromptTemplate
+    """
+
     def __init__(self, example_selector, memory, cannot_answer_comment):
         self.example_selector = example_selector
         self.memory = memory
@@ -6,16 +10,17 @@ class PromptTemplate:
         self.cannot_answer_comment = cannot_answer_comment
 
     def prompt(self, query, topk=10, n_history=3, thres=0.165, min_query_len=20):
-        # validate
+        # validate if the query is related to the domain
         examples = self.example_selector.select(query, topk=topk, thres=thres)
         if not examples:
             return self.cannot_answer_comment
 
+        # repeat the query if it is too short
         if len(query) < min_query_len:
             n_repeat = (min_query_len // len(query)) + 1
             query = " ".join([query for _ in range(n_repeat)])
 
-        # query again
+        # query again: use the previous answer as a context
         example_query = (
             f"previous question answering:\n{str(self.memory[-1])} so {query}"
             if len(self.memory) >= 1

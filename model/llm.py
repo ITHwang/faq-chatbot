@@ -54,6 +54,7 @@ class FAQModel(nn.Module):
 
         pad_id = self.tokenizer.pad_token_id
         tokens = torch.full((bsz, total_len), pad_id, dtype=torch.long, device=self.device)
+        # input prompt tokens
         for k, t in enumerate(prompt_tokens):
             tokens[k, : len(t)] = (
                 torch.tensor(t, dtype=torch.long, device=self.device).clone().detach()
@@ -61,9 +62,11 @@ class FAQModel(nn.Module):
 
         input_text_mask = tokens != pad_id
 
+        # for early stopping when generating zero white space token(\u200b) continuously
         n_zero_white_space = 0
         for cur_pos in range(min_prompt_len, total_len):
             output = self.model.forward(tokens[:, :cur_pos], input_text_mask)
+
             if temperature > 0:
                 probs = torch.softmax(output.logits[:, -1] / temperature, dim=-1)
                 next_token = sample_top_p(probs, top_p)
@@ -71,15 +74,18 @@ class FAQModel(nn.Module):
                 next_token = torch.argmax(output.logits[:, -1], dim=-1)
 
             next_token = next_token.reshape(-1)
+
             if next_token.item() == self.tokenizer.eos_token_id:
                 break
+
             if next_token.item() == 30166:  # \u200b
                 n_zero_white_space += 1
-                if n_zero_white_space > 10:
+                if n_zero_white_space > 10:  # Note 10: hard coding
                     break
             else:
                 n_zero_white_space = 0
 
+            # whether to print generated text in streaming manner
             if stream:
                 out_tok = self.tokenizer.decode(next_token)
                 print(out_tok, end="", flush=True)

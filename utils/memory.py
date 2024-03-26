@@ -2,6 +2,10 @@ from collections import deque
 
 
 class Memory:
+    """
+    like langchain.memory.ConversationBufferMemory
+    """
+
     def __init__(self, capacity: int):
         self.capacity = capacity
         self.q = deque()
